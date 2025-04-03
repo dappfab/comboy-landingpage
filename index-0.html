@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ComboY | Uniswap v4 Yield Optimizasyonu</title>
+    <style>
+        /* Uniswap benzeri tasarım dili */
+        :root {
+            --pink: #FF007A;
+            --pink-light: #FF007A20;
+            --purple: #8856FF;
+            --purple-light: #8856FF20;
+            --blue: #2172E5;
+            --blue-light: #2172E520;
+            --green: #27AE60;
+            --green-light: #27AE6020;
+            --black: #000000;
+            --dark-gray: #222222;
+            --gray: #565A69;
+            --light-gray: #CED0D9;
+            --white: #FFFFFF;
+            --background: #F7F8FA;
+            --brown: #8B4513;
+            --yellow: #F1C40F;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        body {
+            background-color: var(--background);
+            color: var(--black);
+            line-height: 1.6;
+        }
+        
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 2rem;
+            background-color: var(--white);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: var(--black);
+        }
+        
+        .logo span {
+            background: linear-gradient(to right, var(--purple), var(--pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-left: 0.5rem;
+        }
+        
+        nav ul {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+        
+        nav a {
+            text-decoration: none;
+            color: var(--gray);
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        
+        nav a:hover {
+            color: var(--pink);
+        }
+        
+        .btn {
+            background-color: var(--pink);
+            color: var(--white);
+            border: none;
+            border-radius: 12px;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn:hover {
+            opacity: 0.9;
+        }
+        
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--pink);
+            color: var(--pink);
+        }
+        
+        .btn-outline:hover {
+            background-color: var(--pink-light);
+        }
+        
+        .hero {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding: 5rem 2rem;
+            background: linear-gradient(180deg, var(--white) 0%, var(--background) 100%);
+        }
+        
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(to right, var(--brown), var(--pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .hero p {
+            font-size: 1.25rem;
+            color: var(--gray);
+            max-width: 700px;
+            margin-bottom: 2.5rem;
+        }
+        
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .features {
+            padding: 5rem 2rem;
+            background-color: var(--white);
+        }
+        
+        .section-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+        
+        .section-header h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--black);
+        }
+        
+        .section-header p {
+            font-size: 1.125rem;
+            color: var(--gray);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        
+        .feature-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 0 auto;
+            max-width: 1200px;
+        }
+        
+        .feature-card {
+            background-color: var(--white);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .feature-icon {
+            background-color: var(--purple-light);
+            color: var(--purple);
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .feature-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--black);
+        }
+        
+        .feature-card p {
+            color: var(--gray);
+        }
+        
+        .how-it-works {
+            padding: 5rem 2rem;
+            background-color: var(--background);
+        }
+        
+        .steps {
+            display: flex;
+            flex-direction: column;
+            max-width: 900px;
+            margin: 0 auto;
+            gap: 2rem;
+        }
+        
+        .step {
+            display: flex;
+            gap: 2rem;
+        }
+        
+        .step-number {
+            background-color: var(--brown);
+            color: var(--white);
+            width: 40px;
+            height: 40px;
+            min-width: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+        }
+        
+        .step-content h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--black);
+        }
+        
+        .step-content p {
+            color: var(--gray);
+        }
+        
+        .connect-section {
+            background-color: rgba(139, 69, 19, 0.1);
+            padding: 5rem 2rem;
+            text-align: center;
+        }
+        
+        .connect-content {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        
+        .connect-content h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: var(--black);
+        }
+        
+        .connect-content p {
+            font-size: 1.125rem;
+            color: var(--gray);
+            margin-bottom: 2rem;
+        }
+        
+        footer {
+            background-color: var(--dark-gray);
+            color: var(--white);
+            padding: 3rem 2rem;
+        }
+        
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .footer-left {
+            max-width: 350px;
+        }
+        
+        .footer-logo {
+            font-weight: 700;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .footer-logo span {
+            background: linear-gradient(to right, var(--brown), var(--pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-left: 0.5rem;
+        }
+        
+        .footer-description {
+            color: var(--light-gray);
+            margin-bottom: 1.5rem;
+        }
+        
+        .social-links {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .social-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--gray);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            transition: background-color 0.2s;
+        }
+        
+        .social-icon:hover {
+            background-color: var(--brown);
+        }
+        
+        .footer-links {
+            display: flex;
+            gap: 4rem;
+        }
+        
+        .footer-link-group h4 {
+            color: var(--white);
+            margin-bottom: 1.5rem;
+            font-size: 1.125rem;
+        }
+        
+        .footer-link-group ul {
+            list-style: none;
+        }
+        
+        .footer-link-group li {
+            margin-bottom: 0.75rem;
+        }
+        
+        .footer-link-group a {
+            color: var(--light-gray);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        
+        .footer-link-group a:hover {
+            color: var(--pink);
+        }
+        
+        .apy-card {
+            background: linear-gradient(135deg, rgba(139, 69, 19, 0.1), var(--pink-light));
+            border-radius: 16px;
+            padding: 2rem;
+            text-align: center;
+            margin: 4rem auto;
+            max-width: 500px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .apy-value {
+            font-size: 4rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            background: linear-gradient(to right, var(--brown), var(--pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .apy-label {
+            color: var(--gray);
+            font-size: 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+        
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .hero-buttons {
+                flex-direction: column;
+            }
+            
+            .feature-cards {
+                grid-template-columns: 1fr;
+            }
+            
+            .footer-content {
+                flex-direction: column;
+                gap: 3rem;
+            }
+            
+            .footer-links {
+                flex-direction: column;
+                gap: 2rem;
+            }
+            
+            nav ul {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M16 28C22.6274 28 28 22.6274 28 16C28 9.37258 22.6274 4 16 4C9.37258 4 4 9.37258 4 16C4 22.6274 9.37258 28 16 28Z" fill="#FF007A" fill-opacity="0.2"/>
+                <path d="M16 24C20.4183 24 24 20.4183 24 16C24 11.5817 20.4183 8 16 8C11.5817 8 8 11.5817 8 16C8 20.4183 11.5817 24 16 24Z" fill="#FF007A"/>
+                <path d="M18 12C20 10 22 11 23 13C22.5 14 21.5 16 20 15C18.5 14 18 12 18 12Z" fill="#8B4513"/>
+                <path d="M16 10C15 10 13 9 12 8C11 7 10 8 10 9C10 10 11 11 12 11C13 11 16 10 16 10Z" fill="#8B4513"/>
+                <path d="M14 9C14 9 15 8 16 8C17 8 18 9 18 10C18 11 17 12 16 12C15 12 14 11 14 9Z" fill="#F1C40F"/>
+            </svg>
+            <span>ComboY</span>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="#features">Özellikler</a></li>
+                <li><a href="#how-it-works">Nasıl Çalışır</a></li>
+                <li><a href="#connect">Bağlan</a></li>
+                <li><a href="https://docs.comboy.io">Dokümanlar</a></li>
+            </ul>
+        </nav>
+        <a href="#connect" class="btn">Başla</a>
+    </header>
+    
+    <section class="hero">
+        <div class="logo-container">
+            <svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M60 105C85.3757 105 106 84.3757 106 59C106 33.6243 85.3757 13 60 13C34.6243 13 14 33.6243 14 59C14 84.3757 34.6243 105 60 105Z" fill="#FF007A" fill-opacity="0.2"/>
+                <path d="M60 90C76.5685 90 90 76.5685 90 60C90 43.4315 76.5685 30 60 30C43.4315 30 30 43.4315 30 60C30 76.5685 43.4315 90 60 90Z" fill="#FF007A"/>
+                <!-- Cowboy hat -->
+                <path d="M58 45C57 41 56 40 60 39C64 38 68 40 69 43C70 46 67 48 64 48C61 48 59 49 58 45Z" fill="#8B4513"/>
+                <path d="M60 46C60 46 55 44 52 42C49 40 46 42 47 45C48 48 51 49 54 49C57 49 60 46 60 46Z" fill="#8B4513"/>
+                <!-- Cowboy on unicorn -->
+                <path d="M50 60C48 57 46 58 45 60C44 62 46 65 48 65C50 65 52 63 50 60Z" fill="#8B4513"/>
+                <path d="M60 52C57 52 55 54 55 57C55 60 57 62 60 62C63 62 65 60 65 57C65 54 63 52 60 52Z" fill="#F1C40F"/>
+                <path d="M65 57C67 54 70 54 72 56C74 58 74 62 72 64C70 66 67 64 65 57Z" fill="#8B4513"/>
+                <!-- Lasso -->
+                <path d="M45 50C45 50 47 48 50 48C53 48 55 53 50 55C45 57 45 50 45 50Z" fill="none" stroke="#F1C40F" stroke-width="2"/>
+                <path d="M50 55C50 55 55 58 60 62C65 66 70 66 70 66" fill="none" stroke="#F1C40F" stroke-width="2"/>
+            </svg>
+        </div>
+        <h1>Likidite Kovboyu ile<br>Yield'i Yakala</h1>
+        <p>ComboY, Uniswap v4 likidite havuzlarındaki atıl duran varlıklarınızı otomatik olarak yield platformlarında değerlendirerek çift gelir elde etmenizi sağlar.</p>
+        <div class="hero-buttons">
+            <a href="#connect" class="btn">Havuzlara Katılın</a>
+            <a href="#create" class="btn btn-outline">Kendi Stratejinizi Oluşturun</a>
+        </div>
+    </section>
+    
+    <section class="features" id="features">
+        <div class="section-header">
+            <h2>Atıl Varlıklardan Çifte Kazanç</h2>
+            <p>ComboY ile boşta duran tokenlerinizi çalıştırın, hem swap ücreti hem de yield geliri elde edin</p>
+        </div>
+        
+        <div class="feature-cards">
+            <div class="feature-card">
+                <div class="feature-icon">🤠</div>
+                <h3>Otomatik Yield Avcılığı</h3>
+                <p>Hook, kullanılmayan tokenlerinizi otomatik olarak Aave ve Compound gibi DeFi protokollerine yönlendirerek pasif gelir elde etmenizi sağlar.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">⚡</div>
+                <h3>Anında Likidite</h3>
+                <p>Swap işlemleri sırasında gereken tokenler otomatik olarak yield platformlarından çekilir, kesintisiz işlem deneyimi sunar.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">🛡️</div>
+                <h3>Güvenlik Odaklı</h3>
+                <p>Tüm kontratlar kapsamlı güvenlik denetimlerinden geçmiştir, reentrancy saldırılarına ve fiyat manipülasyonlarına karşı koruma sağlar.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">🔧</div>
+                <h3>Özelleştirilebilir Stratejiler</h3>
+                <p>Kendi yield stratejinizi oluşturun veya mevcut havuzlara likidite ekleyerek pasif gelir elde edin.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">📊</div>
+                <h3>Çifte APY</h3>
+                <p>Swap ücretleri ve yield gelirleri bir araya gelerek daha yüksek APY oranları sunar.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">⛽</div>
+                <h3>Gas Optimizasyonu</h3>
+                <p>Yield platformlarıyla etkileşimde gas maliyetlerini minimize etmek için optimize edilmiş kontratlar.</p>
+            </div>
+        </div>
+        
+        <div class="apy-card">
+            <div class="apy-value">%12.4+</div>
+            <div class="apy-label">Ortalama Yıllık Getiri</div>
+            <a href="#connect" class="btn">Havuzlara Katılın</a>
+        </div>
+    </section>
+    
+    <section class="how-it-works" id="how-it-works">
+        <div class="section-header">
+            <h2>Nasıl Çalışır?</h2>
+            <p>ComboY, Uniswap v4'ün yenilikçi hook mimarisini kullanarak likidite kovboyları için çift gelir kaynağı yaratır</p>
+        </div>
+        
+        <div class="steps">
+            <div class="step">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <h3>Temsili Token Sistemi</h3>
+                    <p>Uniswap v4 kontratında temsili tokenler tutulur, gerçek tokenler ise yield platformlarında çalışır.</p>
+                </div>
+            </div>
+            
+            <div class="step">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <h3>Akıllı Likidite Yönetimi</h3>
+                    <p>Swap işlemi gerçekleştiğinde, gereken miktar otomatik olarak yield platformundan çekilir ve swap işlemine dahil edilir.</p>
+                </div>
+            </div>
+            
+            <div class="step">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <h3>Yield Maksimizasyonu</h3>
+                    <p>İşlem tamamlandıktan sonra, kullanılmayan tokenler tekrar yield platformlarına stake edilir, sürekli gelir elde edilir.</p>
+                </div>
+            </div>
+            
+            <div class="step">
+                <div class="step-number">4</div>
+                <div class="step-content">
+                    <h3>Çift Gelir Kaynağı</h3>
+                    <p>Likidite kovboyları hem normal swap işlem ücretlerinden hem de yield gelirlerinden faydalanarak toplam kazançlarını artırır.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <section class="connect-section" id="connect">
+        <div class="connect-content">
+            <h2>Hemen Başlayın</h2>
+            <p>Wallet'ınızı bağlayarak mevcut havuzlara likidite ekleyin veya kendi stratejinizi oluşturun.</p>
+            <a href="#" class="btn">Cüzdanı Bağla</a>
+        </div>
+    </section>
+    
+    <footer>
+        <div class="footer-content">
+            <div class="footer-left">
+                <div class="footer-logo">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" fill="#FF007A" fill-opacity="0.2"/>
+                        <path d="M12 18C15.3137 18 18 15.3137 18 12C18 8.68629 15.3137 6 12 6C8.68629 6 6 8.68629 6 12C6 15.3137 8.68629 18 12 18Z" fill="#FF007A"/>
+                        <path d="M14 9C15 8 16 8.5 16.5 9.5C16.2 10 15.7 11 15 10.5C14.2 10 14 9 14 9Z" fill="#8B4513"/>
+                        <path d="M12 8C11.5 8 10.5 7.5 10 7C9.5 6.5 9 7 9 7.5C9 8 9.5 8.5 10 8.5C10.5 8.5 12 8 12 8Z" fill="#8B4513"/>
+                        <path d="M11 7.5C11 7.5 11.5 7 12 7C12.5 7 13 7.5 13 8C13 8.5 12.5 9 12 9C11.5 9 11 8.5 11 7.5Z" fill="#F1C40F"/>
+                    </svg>
+                    <span>ComboY</span>
+                </div>
+                <p class="footer-description">
+                    ComboY, Uniswap v4 protokolü üzerinde çalışan, atıl duran varlıklarınızdan çifte gelir elde etmenizi sağlayan bir DeFi çözümüdür.
+                </p>
+                <div class="social-links">
+                    <a href="#" class="social-icon">T</a>
+                    <a href="#" class="social-icon">D</a>
+                    <a href="#" class="social-icon">G</a>
+                </div>
+            </div>
+            
+            <div class="footer-links">
+                <div class="footer-link-group">
+                    <h4>Ürün</h4>
+                    <ul>
+                        <li><a href="#">Özellikler</a></li>
+                        <li><a href="#">Havuzlar</a></li>
+                        <li><a href="#">Stratejiler</a></li>
+                        <li><a href="#">Yol Haritası</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-link-group">
+                    <h4>Kaynaklar</h4>
+                    <ul>
+                        <li><a href="#">Dokümanlar</a></li>
+                        <li><a href="#">API</a></li>
+                        <li><a href="#">GitHub</a></li>
+                        <li><a href="#">Denetim Raporları</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-link-group">
+                    <h4>Topluluk</h4>
+                    <ul>
+                        <li><a href="#">Discord</a></li>
+                        <li><a href="#">Twitter</a></li>
+                        <li><a href="#">Forum</a></li>
+                        <li><a href="#">Governance</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
